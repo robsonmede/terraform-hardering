@@ -1,0 +1,71 @@
+# 1. Security Hub
+resource "aws_securityhub_account" "default" {}
+
+# 2. GuardDuty
+resource "aws_guardduty_detector" "main" {
+  enable = true
+}
+
+3. CloudTrail
+
+resource "aws_cloudtrail" "security" {
+
+  name                          = "security-trail"
+
+  include_global_service_events = true
+
+  is_multi_region_trail         = true
+
+  enable_logging                = true
+
+}
+
+# 4. Criptografia S3
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "bucket" {
+
+ bucket = aws_s3_bucket.logs.id
+
+ rule {
+
+   apply_server_side_encryption_by_default {
+
+      sse_algorithm = "AES256"
+
+   }
+
+ }
+
+}
+
+# 5. Bloquear Bucket Público
+
+resource "aws_s3_bucket_public_access_block" "bucket" {
+
+  bucket = aws_s3_bucket.logs.id
+
+  block_public_acls = true
+
+  block_public_policy = true
+
+  ignore_public_acls = true
+
+  restrict_public_buckets = true
+
+}
+# 6. AWS Config
+resource "aws_config_configuration_recorder" "default" {
+
+ name = "config"
+
+ role_arn = aws_iam_role.config.arn
+
+}
+ # 7. KMS
+resource "aws_kms_key" "default" {
+
+ description = "Cloud Security Key"
+
+ enable_key_rotation = true
+
+}
